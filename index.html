@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oltin Lug'at Yo'li</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body {
+      background: linear-gradient(180deg, #1b0b3b 0%, #2d1259 55%, #16092e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 440px;
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .brand {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #ffd54f;
+      text-shadow: 0 2px 10px rgba(255, 213, 79, 0.35);
+    }
+    .icon-btn {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .level-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 213, 79, 0.35);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .level-card:active { transform: scale(0.98); }
+    .level-card.locked {
+      opacity: 0.55;
+      border-color: rgba(255,255,255,0.15);
+      cursor: not-allowed;
+    }
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .badge {
+      background: rgba(255, 213, 79, 0.2);
+      color: #ffd54f;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .arabic-title {
+      font-size: 22px;
+      direction: rtl;
+      text-align: right;
+      color: #ffe082;
+      margin: 8px 0;
+      font-weight: 700;
+    }
+    .level-title { font-size: 17px; font-weight: 800; }
+    .level-sub { font-size: 13px; color: #d1c4e9; margin-top: 4px; }
+    .lock-msg { font-size: 12px; color: #ffab91; margin-top: 8px; font-weight: 600; }
+
+    /* Game screen */
+    .game-screen { display: none; flex-direction: column; flex: 1; }
+    .hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(0,0,0,0.28);
+      padding: 10px 12px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+    .hearts { font-size: 16px; }
+    .gold-box {
+      background: rgba(255, 213, 79, 0.18);
+      border: 1px solid rgba(255, 213, 79, 0.45);
+      color: #ffd54f;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .question-box {
+      background: rgba(20, 9, 45, 0.92);
+      border: 1.5px solid rgba(255, 213, 79, 0.45);
+      border-radius: 22px;
+      padding: 18px 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    }
+    .q-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #b39ddb;
+      margin-bottom: 8px;
+    }
+    .arabic-word {
+      font-size: 38px;
+      font-weight: 800;
+      text-align: center;
+      direction: rtl;
+      color: #fff;
+      text-shadow: 0 0 18px rgba(255, 213, 79, 0.45);
+      margin: 8px 0 12px;
+    }
+    .timer-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #4caf50, #ffd54f);
+      transition: width 0.2s linear;
+    }
+    .timer-num {
+      text-align: right;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffd54f;
+      margin-bottom: 10px;
+    }
+    .options { display: flex; flex-direction: column; gap: 9px; }
+    .opt-btn {
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.16);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .opt-num {
+      background: rgba(255,255,255,0.14);
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .opt-btn.correct { background: rgba(46, 125, 50, 0.55); border-color: #66bb6a; }
+    .opt-btn.wrong { background: rgba(198, 40, 40, 0.55); border-color: #ef5350; }
+
+    /* Runner road */
+    .road-wrap {
+      margin-top: auto;
+      padding-top: 14px;
+      height: 125px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    .road {
+      width: 82%;
+      height: 105px;
+      background: #2c2a3e;
+      border-left: 4px solid #ffd54f;
+      border-right: 4px solid #ffd54f;
+      clip-path: polygon(16% 0%, 84% 0%, 100% 100%, 0% 100%);
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .runner {
+      position: absolute;
+      bottom: 10px;
+      font-size: 38px;
+      transition: transform 0.25s ease;
+    }
+    .runner.hop { transform: translateY(-18px) scale(1.1); }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 4, 24, 0.85);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .modal-card {
+      background: #241047;
+      border: 2px solid #ffd54f;
+      border-radius: 22px;
+      padding: 22px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .primary-btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 14px;
+      background: #ffd54f;
+      color: #1b0b3b;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="homeScreen">
+    <div class="top-bar">
+      <div class="brand">OLTIN LUG'AT YO'LI</div>
+      <button class="icon-btn" id="soundToggle" title="Ovoz">🔊</button>
+    </div>
+    <div id="levelsList"></div>
+  </div>
+
+  <div class="app game-screen" id="gameScreen">
+    <div class="hud">
+      <div class="hearts" id="heartsDisplay">❤️❤️❤️</div>
+      <div id="levelLabel" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div class="gold-box" id="goldDisplay">🪙 0 / 0</div>
+      <button class="icon-btn" id="exitBtn" style="width:32px;height:32px;font-size:14px;">✕</button>
+    </div>
+
+    <div class="question-box">
+      <div class="q-meta">
+        <span>Mufrodat</span>
+        <span id="qCounter">1 / 10</span>
+      </div>
+      <div class="arabic-word" id="arabicWord"></div>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+      <div class="timer-num" id="timerNum">10</div>
+      <div class="options" id="optionsBox"></div>
+    </div>
+
+    <div class="road-wrap">
+      <div class="road">
+        <div class="runner" id="runner">🏃</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal">
+    <div class="modal-card">
+      <h2 id="modalTitle" style="color:#ffd54f;margin-bottom:10px;"></h2>
+      <p id="modalText" style="font-size:14px;line-height:1.5;color:#ede7f6;"></p>
+      <button class="primary-btn" id="modalBtn">Davom etish</button>
+    </div>
+  </div>
+
+  <script>
+    const LEVELS = [
+      {
+        id: 1,
+        badge: "1-manzil",
+        title: "Joylar va ob-havo",
+        arabicTitle: "الْأَمَاكِنُ وَالْجَوُّ",
+        subtitle: "6-bo'lim mufrodatlari · Oltin yig'ing",
+        unlockPercent: 80,
+        words: [
+          { ar: "مُعْتَدِلٌ", uz: "Mo‘tadil, me’yoriy" },
+          { ar: "مُمْطِرٌ", uz: "Yomg‘irli" },
+          { ar: "غَائِمٌ", uz: "Bulutli" },
+          { ar: "مُشْمِسٌ", uz: "Quyoshli" },
+          { ar: "مَنْظَرٌ", uz: "Manzara" },
+          { ar: "عَاصِمَةٌ", uz: "Poytaxt" },
+          { ar: "بِجَانِبِ", uz: "Yonida, yaqinida" },
+          { ar: "مُزْدَحِمٌ", uz: "Serqatnov, gavjum" },
+          { ar: "اتِّجَاهٌ", uz: "Yo‘nalish, taraf" },
+          { ar: "يَتَسَاقَطُ", uz: "Yog‘adi, to‘kiladi" },
+          { ar: "احْتِمَالٌ", uz: "Ehtimol, ehtimollik" },
+          { ar: "شَرْقٌ", uz: "Sharq" },
+          { ar: "غَرْبٌ", uz: "G‘arb" },
+          { ar: "شَمَالٌ", uz: "Shimol" },
+          { ar: "جَنُوبٌ", uz: "Janub" },
+          { ar: "يَمِينٌ", uz: "O‘ng (tomon)" },
+          { ar: "يَسَارٌ", uz: "Chap (tomon)" },
+          { ar: "مُرْتَفِعٌ", uz: "Baland, ko‘tarilgan" },
+          { ar: "مُنْخَفِضٌ", uz: "Past, pasaygan" },
+          { ar: "خَفِيفَةٌ", uz: "Yengil" },
+          { ar: "شَدِيدَةٌ", uz: "Kuchli, qattiq" },
+          { ar: "حَارٌّ", uz: "Issiq" },
+          { ar: "بَارِدٌ", uz: "Sovuq" },
+          { ar: "نَهَارًا", uz: "Kunduzi" },
+          { ar: "لَيْلًا", uz: "Kechasi" }
+        ]
+      },
+      {
+        id: 2,
+        badge: "2-manzil",
+        title: "Keyingi bosqich (tez kunda)",
+        arabicTitle: "الْمَرْحَلَةُ الثَّانِيَةُ",
+        subtitle: "1-manzilda kamida 80% natija ko'rsating",
+        unlockPercent: 80,
+        words: [
+          { ar: "مَوْقِفُ السَّيَّارَاتِ", uz: "Avtoturargoh" },
+          { ar: "تَحْتَ الصِّفْرِ", uz: "Noldan past" },
+          { ar: "طَوَالَ الْيَوْمِ", uz: "Kun bo‘yi" },
+          { ar: "يَشْعُرُ بِـ", uz: "His qiladi" }
+        ]
+      }
+    ];
+
+    let soundOn = true;
+    let progress = JSON.parse(localStorage.getItem("oltin_lugat_progress") || "{}");
+    let currentLevel = null;
+    let qIndex = 0;
+    let gold = 0;
+    let hearts = 3;
+    let timerId = null;
+    let timeLeft = 10;
+
+    function playTone(freq, duration = 0.14) {
+      if (!soundOn) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.value = 0.12;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function renderHome() {
+      document.getElementById("gameScreen").style.display = "none";
+      document.getElementById("homeScreen").style.display = "block";
+      const list = document.getElementById("levelsList");
+      list.innerHTML = "";
+
+      LEVELS.forEach((lvl, idx) => {
+        const prevLvl = idx > 0 ? LEVELS[idx - 1] : null;
+        const prevPercent = prevLvl ? (progress[prevLvl.id]?.percent || 0) : 100;
+        const unlocked = idx === 0 || prevPercent >= (prevLvl?.unlockPercent || 80);
+        const savedPercent = progress[lvl.id]?.percent || 0;
+
+        const card = document.createElement("div");
+        card.className = "level-card" + (unlocked ? "" : " locked");
+        card.innerHTML = `
+          <div class="level-header">
+            <span class="badge">${lvl.badge}</span>
+            <span class="badge">${unlocked ? savedPercent + "% natija" : "🔒 Qulflangan"}</span>
+          </div>
+          <div class="arabic-title">${lvl.arabicTitle}</div>
+          <div class="level-title">${lvl.title}</div>
+          <div class="level-sub">${lvl.subtitle} · ${lvl.words.length} ta so'z</div>
+          ${!unlocked ? `<div class="lock-msg">${prevLvl.badge}da kamida ${prevLvl.unlockPercent}% natija yig'ing</div>` : ""}
+        `;
+        if (unlocked) {
+          card.onclick = () => startLevel(lvl);
+        }
+        list.appendChild(card);
+      });
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startLevel(lvl) {
+      currentLevel = lvl;
+      qIndex = 0;
+      gold = 0;
+      hearts = 3;
+      document.getElementById("homeScreen").style.display = "none";
+      document.getElementById("gameScreen").style.display = "flex";
+      document.getElementById("levelLabel").textContent = `${lvl.badge}. ${lvl.title}`;
+      updateHud();
+      loadQuestion();
+    }
+
+    function updateHud() {
+      document.getElementById("heartsDisplay").textContent = "❤️".repeat(hearts) + "🖤".repeat(Math.max(0, 3 - hearts));
+      document.getElementById("goldDisplay").textContent = `🪙 ${gold} / ${currentLevel.words.length}`;
+    }
+
+    function loadQuestion() {
+      clearInterval(timerId);
+      if (qIndex >= currentLevel.words.length || hearts <= 0) {
+        finishLevel();
+        return;
+      }
+
+      const item = currentLevel.words[qIndex];
+      document.getElementById("qCounter").textContent = `${qIndex + 1} / ${currentLevel.words.length}`;
+      document.getElementById("arabicWord").textContent = item.ar;
+
+      const allTranslations = LEVELS.flatMap(l => l.words).map(w => w.uz).filter(u => u !== item.uz);
+      const distractors = shuffle(allTranslations).slice(0, 3);
+      const options = shuffle([item.uz, ...distractors]);
+
+      const optBox = document.getElementById("optionsBox");
+      optBox.innerHTML = "";
+      options.forEach((optText, i) => {
+        const btn = document.createElement("button");
+        btn.className = "opt-btn";
+        btn.innerHTML = `<span class="opt-num">${i + 1}</span><span>${optText}</span>`;
+        btn.onclick = () => handleAnswer(btn, optText === item.uz);
+        optBox.appendChild(btn);
+      });
+
+      timeLeft = 10;
+      document.getElementById("timerNum").textContent = timeLeft;
+      document.getElementById("timerBar").style.width = "100%";
+
+      timerId = setInterval(() => {
+        timeLeft -= 0.2;
+        const pct = Math.max(0, (timeLeft / 10) * 100);
+        document.getElementById("timerBar").style.width = pct + "%";
+        document.getElementById("timerNum").textContent = Math.max(0, Math.ceil(timeLeft));
+        if (timeLeft <= 0) {
+          clearInterval(timerId);
+          handleAnswer(null, false);
+        }
+      }, 200);
+    }
+
+    function handleAnswer(btn, isCorrect) {
+      clearInterval(timerId);
+      const allBtns = document.querySelectorAll(".opt-btn");
+      allBtns.forEach(b => (b.disabled = true));
+
+      if (isCorrect) {
+        if (btn) btn.classList.add("correct");
+        gold += 1;
+        playTone(660, 0.14);
+        const runner = document.getElementById("runner");
+        runner.classList.add("hop");
+        setTimeout(() => runner.classList.remove("hop"), 280);
+      } else {
+        if (btn) btn.classList.add("wrong");
+        hearts -= 1;
+        playTone(210, 0.22);
+      }
+
+      updateHud();
+      setTimeout(() => {
+        qIndex += 1;
+        loadQuestion();
+      }, 650);
+    }
+
+    function finishLevel() {
+      const percent = Math.round((gold / currentLevel.words.length) * 100);
+      const prevBest = progress[currentLevel.id]?.percent || 0;
+      progress[currentLevel.id] = { percent: Math.max(prevBest, percent) };
+      localStorage.setItem("oltin_lugat_progress", JSON.stringify(progress));
+
+      const passed = percent >= currentLevel.unlockPercent && hearts > 0;
+      document.getElementById("modalTitle").textContent = passed ? "🎉 Manzil zabt etildi!" : "💪 Yana bir bor urinib ko‘ring";
+      document.getElementById("modalText").textContent =
+        `Siz ${gold} ta oltin (${percent}%) yig'dingiz. Keyingi manzilni ochish uchun kamida ${currentLevel.unlockPercent}% natija kerak.`;
+      document.getElementById("modalBtn").onclick = () => {
+        document.getElementById("resultModal").style.display = "none";
+        renderHome();
+      };
+      document.getElementById("resultModal").style.display = "flex";
+    }
+
+    document.getElementById("soundToggle").onclick = (e) => {
+      soundOn = !soundOn;
+      e.target.textContent = soundOn ? "🔊" : "🔇";
+    };
+    document.getElementById("exitBtn").onclick = () => {
+      clearInterval(timerId);
+      renderHome();
+    };
+
+    renderHome();
+  </script>
+</body>
+</html>
